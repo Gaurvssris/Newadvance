@@ -1,0 +1,19 @@
+
+
+trigger:
+- main
+
+pool:
+  name: Devopsadvanceagent
+
+steps:
+- task: TerraformTask@5
+  displayName: Terraform init
+  inputs:
+    provider: 'azurerm'
+    command: 'init'  
+    workingDirectory: '$(System.DefaultWorkingDirectory)/Root/Dev'
+    backendServiceArm: 'Devopsadvancesc'
+    backendAzureRmStorageAccountName: 'devsecopsstrg'
+    backendAzureRmContainerName: 'devsecopcont'
+    backendAzureRmKey: 'backup.tfstate'
