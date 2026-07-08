@@ -1,18 +1,216 @@
 
 
+# trigger:
+# - main
+
+# pool:
+#   name: Devopsadvanceagent
+
+# steps:
+# - task: TerraformTask@5
+#   inputs:
+#     provider: 'azurerm'
+#     command: 'init'
+#     workingDirectory: '$(System.DefaultWorkingDirectory)/Root/Dev'
+#     backendServiceArm: 'Devopsadvancesc'
+#     backendAzureRmStorageAccountName: 'devsecopsstrg'
+#     backendAzureRmContainerName: 'devsecopcont'
+#     backendAzureRmKey: 'backup.tfstate'
 trigger:
 - main
 
 pool:
   name: Devopsadvanceagent
 
-steps:
-- task: TerraformTask@5
-  inputs:
-    provider: 'azurerm'
-    command: 'init'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/Root/Dev'
-    backendServiceArm: 'Devopsadvancesc'
-    backendAzureRmStorageAccountName: 'devsecopsstrg'
-    backendAzureRmContainerName: 'devsecopcont'
-    backendAzureRmKey: 'backup.tfstate'
+variables:
+  terraformVersion: '1.10.5'
+
+stages:
+
+#===========================
+# DEV
+#===========================
+- stage: DEV
+  displayName: "Terraform DEV"
+
+  jobs:
+  - job: DEV
+    displayName: "Terraform DEV"
+
+    steps:
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: $(terraformVersion)
+
+    - task: TerraformTask@5
+      displayName: Terraform Init
+      inputs:
+        provider: azurerm
+        command: init
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        backendServiceArm: Devopsadvancesc
+        backendAzureRmStorageAccountName: devsecopsstrg
+        backendAzureRmContainerName: devsecopcont
+        backendAzureRmKey: dev.tfstate
+
+    - task: TerraformTask@5
+      displayName: Terraform Validate
+      inputs:
+        provider: azurerm
+        command: validate
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+
+    - script: |
+        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+        tflint --init
+      displayName: Install TFLint
+
+    - script: |
+        cd $(System.DefaultWorkingDirectory)/Root/Dev
+        tflint
+      displayName: Run TFLint
+
+    - script: |
+        curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+      displayName: Install TFSec
+
+    - script: |
+        cd $(System.DefaultWorkingDirectory)/Root/Dev
+        tfsec .
+      displayName: Run TFSec
+
+    - script: |
+        python3 -m pip install --upgrade pip
+        pip3 install checkov
+      displayName: Install Checkov
+
+    - script: |
+        checkov -d $(System.DefaultWorkingDirectory)/Root/Dev
+      displayName: Run Checkov
+
+    - task: TerraformTask@5
+      displayName: Terraform Plan
+      inputs:
+        provider: azurerm
+        command: plan
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        environmentServiceNameAzureRM: Devopsadvancesc
+
+
+
+#===========================
+# QA
+#===========================
+- stage: QA
+  displayName: "Terraform QA"
+  dependsOn: DEV
+
+  jobs:
+  - job: QA
+
+    steps:
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: $(terraformVersion)
+
+    - task: TerraformTask@5
+      displayName: Terraform Init
+      inputs:
+        provider: azurerm
+        command: init
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/QA
+        backendServiceArm: Devopsadvancesc
+        backendAzureRmStorageAccountName: devsecopsstrg
+        backendAzureRmContainerName: devsecopcont
+        backendAzureRmKey: qa.tfstate
+
+    - task: TerraformTask@5
+      displayName: Terraform Validate
+      inputs:
+        provider: azurerm
+        command: validate
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/QA
+
+    - script: |
+        tflint --init
+        cd $(System.DefaultWorkingDirectory)/Root/QA
+        tflint
+      displayName: Run TFLint
+
+    - script: |
+        cd $(System.DefaultWorkingDirectory)/Root/QA
+        tfsec .
+      displayName: Run TFSec
+
+    - script: |
+        checkov -d $(System.DefaultWorkingDirectory)/Root/QA
+      displayName: Run Checkov
+
+    - task: TerraformTask@5
+      displayName: Terraform Plan
+      inputs:
+        provider: azurerm
+        command: plan
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/QA
+        environmentServiceNameAzureRM: Devopsadvancesc
+
+
+
+#===========================
+# PROD
+#===========================
+- stage: PROD
+  displayName: "Terraform PROD"
+  dependsOn: QA
+
+  jobs:
+  - job: PROD
+
+    steps:
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: $(terraformVersion)
+
+    - task: TerraformTask@5
+      displayName: Terraform Init
+      inputs:
+        provider: azurerm
+        command: init
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
+        backendServiceArm: Devopsadvancesc
+        backendAzureRmStorageAccountName: devsecopsstrg
+        backendAzureRmContainerName: devsecopcont
+        backendAzureRmKey: prod.tfstate
+
+    - task: TerraformTask@5
+      displayName: Terraform Validate
+      inputs:
+        provider: azurerm
+        command: validate
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
+
+    - script: |
+        tflint --init
+        cd $(System.DefaultWorkingDirectory)/Root/Prod
+        tflint
+      displayName: Run TFLint
+
+    - script: |
+        cd $(System.DefaultWorkingDirectory)/Root/Prod
+        tfsec .
+      displayName: Run TFSec
+
+    - script: |
+        checkov -d $(System.DefaultWorkingDirectory)/Root/Prod
+      displayName: Run Checkov
+
+    - task: TerraformTask@5
+      displayName: Terraform Plan
+      inputs:
+        provider: azurerm
+        command: plan
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
+        environmentServiceNameAzureRM: Devopsadvancesc
