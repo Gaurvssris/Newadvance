@@ -16,6 +16,7 @@
 #     backendAzureRmStorageAccountName: 'devsecopsstrg'
 #     backendAzureRmContainerName: 'devsecopcont'
 #     backendAzureRmKey: 'backup.tfstate'
+
 trigger:
 - main
 
@@ -61,36 +62,45 @@ stages:
         command: validate
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
 
-    - script: |
-        sudo apt-get update
-        sudo apt-get install -y unzip curl
-        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-        export PATH=$PATH:/usr/local/bin
-        tflint --init
+    - powershell: |
+        $ErrorActionPreference = "Stop"
+        $tflintVersion = (Invoke-RestMethod -Uri "https://api.github.com/repos/terraform-linters/tflint/releases/latest").tag_name
+        $url = "https://github.com/terraform-linters/tflint/releases/download/$tflintVersion/tflint_windows_amd64.zip"
+        $zipPath = "$(Agent.TempDirectory)\tflint.zip"
+        $installDir = "$(Agent.TempDirectory)\tflint"
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        Invoke-WebRequest -Uri $url -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
+        Write-Host "##vso[task.prependpath]$installDir"
       displayName: Install TFLint
 
-    - script: |
-        cd $(System.DefaultWorkingDirectory)/Root/Dev
+    - powershell: |
+        tflint --init
+        cd "$(System.DefaultWorkingDirectory)/Root/Dev"
         tflint
       displayName: Run TFLint
 
-    - script: |
-        sudo apt-get install -y unzip curl
-        curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+    - powershell: |
+        $ErrorActionPreference = "Stop"
+        $tfsecVersion = (Invoke-RestMethod -Uri "https://api.github.com/repos/aquasecurity/tfsec/releases/latest").tag_name
+        $installDir = "$(Agent.TempDirectory)\tfsec"
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        Invoke-WebRequest -Uri "https://github.com/aquasecurity/tfsec/releases/download/$tfsecVersion/tfsec-windows-amd64.exe" -OutFile "$installDir\tfsec.exe"
+        Write-Host "##vso[task.prependpath]$installDir"
       displayName: Install TFSec
 
-    - script: |
-        cd $(System.DefaultWorkingDirectory)/Root/Dev
+    - powershell: |
+        cd "$(System.DefaultWorkingDirectory)/Root/Dev"
         tfsec .
       displayName: Run TFSec
 
-    - script: |
-        python3 -m pip install --upgrade pip
-        pip3 install checkov
+    - powershell: |
+        python -m pip install --upgrade pip
+        pip install checkov
       displayName: Install Checkov
 
-    - script: |
-        checkov -d $(System.DefaultWorkingDirectory)/Root/Dev
+    - powershell: |
+        checkov -d "$(System.DefaultWorkingDirectory)/Root/Dev"
       displayName: Run Checkov
 
     - task: TerraformTask@5
@@ -137,36 +147,45 @@ stages:
         command: validate
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/QA
 
-    - script: |
-        sudo apt-get update
-        sudo apt-get install -y unzip curl
-        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-        export PATH=$PATH:/usr/local/bin
-        tflint --init
+    - powershell: |
+        $ErrorActionPreference = "Stop"
+        $tflintVersion = (Invoke-RestMethod -Uri "https://api.github.com/repos/terraform-linters/tflint/releases/latest").tag_name
+        $url = "https://github.com/terraform-linters/tflint/releases/download/$tflintVersion/tflint_windows_amd64.zip"
+        $zipPath = "$(Agent.TempDirectory)\tflint.zip"
+        $installDir = "$(Agent.TempDirectory)\tflint"
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        Invoke-WebRequest -Uri $url -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
+        Write-Host "##vso[task.prependpath]$installDir"
       displayName: Install TFLint
 
-    - script: |
-        cd $(System.DefaultWorkingDirectory)/Root/QA
+    - powershell: |
+        tflint --init
+        cd "$(System.DefaultWorkingDirectory)/Root/QA"
         tflint
       displayName: Run TFLint
 
-    - script: |
-        sudo apt-get install -y unzip curl
-        curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+    - powershell: |
+        $ErrorActionPreference = "Stop"
+        $tfsecVersion = (Invoke-RestMethod -Uri "https://api.github.com/repos/aquasecurity/tfsec/releases/latest").tag_name
+        $installDir = "$(Agent.TempDirectory)\tfsec"
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        Invoke-WebRequest -Uri "https://github.com/aquasecurity/tfsec/releases/download/$tfsecVersion/tfsec-windows-amd64.exe" -OutFile "$installDir\tfsec.exe"
+        Write-Host "##vso[task.prependpath]$installDir"
       displayName: Install TFSec
 
-    - script: |
-        cd $(System.DefaultWorkingDirectory)/Root/QA
+    - powershell: |
+        cd "$(System.DefaultWorkingDirectory)/Root/QA"
         tfsec .
       displayName: Run TFSec
 
-    - script: |
-        python3 -m pip install --upgrade pip
-        pip3 install checkov
+    - powershell: |
+        python -m pip install --upgrade pip
+        pip install checkov
       displayName: Install Checkov
 
-    - script: |
-        checkov -d $(System.DefaultWorkingDirectory)/Root/QA
+    - powershell: |
+        checkov -d "$(System.DefaultWorkingDirectory)/Root/QA"
       displayName: Run Checkov
 
     - task: TerraformTask@5
@@ -213,36 +232,45 @@ stages:
         command: validate
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
 
-    - script: |
-        sudo apt-get update
-        sudo apt-get install -y unzip curl
-        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-        export PATH=$PATH:/usr/local/bin
-        tflint --init
+    - powershell: |
+        $ErrorActionPreference = "Stop"
+        $tflintVersion = (Invoke-RestMethod -Uri "https://api.github.com/repos/terraform-linters/tflint/releases/latest").tag_name
+        $url = "https://github.com/terraform-linters/tflint/releases/download/$tflintVersion/tflint_windows_amd64.zip"
+        $zipPath = "$(Agent.TempDirectory)\tflint.zip"
+        $installDir = "$(Agent.TempDirectory)\tflint"
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        Invoke-WebRequest -Uri $url -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
+        Write-Host "##vso[task.prependpath]$installDir"
       displayName: Install TFLint
 
-    - script: |
-        cd $(System.DefaultWorkingDirectory)/Root/Prod
+    - powershell: |
+        tflint --init
+        cd "$(System.DefaultWorkingDirectory)/Root/Prod"
         tflint
       displayName: Run TFLint
 
-    - script: |
-        sudo apt-get install -y unzip curl
-        curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+    - powershell: |
+        $ErrorActionPreference = "Stop"
+        $tfsecVersion = (Invoke-RestMethod -Uri "https://api.github.com/repos/aquasecurity/tfsec/releases/latest").tag_name
+        $installDir = "$(Agent.TempDirectory)\tfsec"
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+        Invoke-WebRequest -Uri "https://github.com/aquasecurity/tfsec/releases/download/$tfsecVersion/tfsec-windows-amd64.exe" -OutFile "$installDir\tfsec.exe"
+        Write-Host "##vso[task.prependpath]$installDir"
       displayName: Install TFSec
 
-    - script: |
-        cd $(System.DefaultWorkingDirectory)/Root/Prod
+    - powershell: |
+        cd "$(System.DefaultWorkingDirectory)/Root/Prod"
         tfsec .
       displayName: Run TFSec
 
-    - script: |
-        python3 -m pip install --upgrade pip
-        pip3 install checkov
+    - powershell: |
+        python -m pip install --upgrade pip
+        pip install checkov
       displayName: Install Checkov
 
-    - script: |
-        checkov -d $(System.DefaultWorkingDirectory)/Root/Prod
+    - powershell: |
+        checkov -d "$(System.DefaultWorkingDirectory)/Root/Prod"
       displayName: Run Checkov
 
     - task: TerraformTask@5
