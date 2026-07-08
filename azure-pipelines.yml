@@ -62,7 +62,10 @@ stages:
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
 
     - script: |
+        sudo apt-get update
+        sudo apt-get install -y unzip curl
         curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+        export PATH=$PATH:/usr/local/bin
         tflint --init
       displayName: Install TFLint
 
@@ -72,6 +75,7 @@ stages:
       displayName: Run TFLint
 
     - script: |
+        sudo apt-get install -y unzip curl
         curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
       displayName: Install TFSec
 
@@ -134,15 +138,32 @@ stages:
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/QA
 
     - script: |
+        sudo apt-get update
+        sudo apt-get install -y unzip curl
+        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+        export PATH=$PATH:/usr/local/bin
         tflint --init
+      displayName: Install TFLint
+
+    - script: |
         cd $(System.DefaultWorkingDirectory)/Root/QA
         tflint
       displayName: Run TFLint
 
     - script: |
+        sudo apt-get install -y unzip curl
+        curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+      displayName: Install TFSec
+
+    - script: |
         cd $(System.DefaultWorkingDirectory)/Root/QA
         tfsec .
       displayName: Run TFSec
+
+    - script: |
+        python3 -m pip install --upgrade pip
+        pip3 install checkov
+      displayName: Install Checkov
 
     - script: |
         checkov -d $(System.DefaultWorkingDirectory)/Root/QA
@@ -193,15 +214,32 @@ stages:
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
 
     - script: |
+        sudo apt-get update
+        sudo apt-get install -y unzip curl
+        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+        export PATH=$PATH:/usr/local/bin
         tflint --init
+      displayName: Install TFLint
+
+    - script: |
         cd $(System.DefaultWorkingDirectory)/Root/Prod
         tflint
       displayName: Run TFLint
 
     - script: |
+        sudo apt-get install -y unzip curl
+        curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+      displayName: Install TFSec
+
+    - script: |
         cd $(System.DefaultWorkingDirectory)/Root/Prod
         tfsec .
       displayName: Run TFSec
+
+    - script: |
+        python3 -m pip install --upgrade pip
+        pip3 install checkov
+      displayName: Install Checkov
 
     - script: |
         checkov -d $(System.DefaultWorkingDirectory)/Root/Prod
