@@ -1,4 +1,4 @@
-resource "azurerm_kubernetes_cluster" "main" {
+resource "azurerm_kubernetes_cluster" "DumAks" {
 
   for_each = var.aks
 
@@ -9,12 +9,20 @@ resource "azurerm_kubernetes_cluster" "main" {
   kubernetes_version  = each.value.kubernetes_version
 
   default_node_pool {
-    name       = each.value.node_pool_name
-    node_count = each.value.node_count
-    vm_size    = each.value.vm_size
+    name           = each.value.node_pool_name
+    vm_size        = each.value.vm_size
+    node_count     = each.value.node_count
+
+    vnet_subnet_id = each.value.vnet_subnet_id
   }
 
   identity {
     type = "SystemAssigned"
+  }
+
+  network_profile {
+    network_plugin    = "azure"
+    network_policy    = "azure"
+    load_balancer_sku = "standard"
   }
 }
