@@ -15,14 +15,14 @@ variables:
 stages:
 
 #===========================
-# DEV
+# Prod
 #===========================
-- stage: DEV
-  displayName: "Terraform DEV"
+- stage: Prod
+  displayName: "Terraform Prod"
 
   jobs:
-  - job: DEV
-    displayName: "Terraform DEV"
+  - job: Prod
+    displayName: "Terraform Prod"
 
     steps:
 
@@ -35,7 +35,7 @@ stages:
       inputs:
         provider: azurerm
         command: init
-        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
         backendServiceArm: Devopsadvancesc
         backendAzureRmStorageAccountName: devsecopsstrg
         backendAzureRmContainerName: devsecopcont
@@ -46,7 +46,7 @@ stages:
       inputs:
         provider: azurerm
         command: validate
-        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
 
     - powershell: |
         $ErrorActionPreference = "Stop"
@@ -62,7 +62,7 @@ stages:
 
     - powershell: |
         tflint --init
-        cd "$(System.DefaultWorkingDirectory)/Root/Dev"
+        cd "$(System.DefaultWorkingDirectory)/Root/Prod"
         tflint
       displayName: Run TFLint
 
@@ -76,7 +76,7 @@ stages:
       displayName: Install TFSec
 
     - powershell: |
-        cd "$(System.DefaultWorkingDirectory)/Root/Dev"
+        cd "$(System.DefaultWorkingDirectory)/Root/Prod"
         tfsec .
       displayName: Run TFSec
 
@@ -85,7 +85,7 @@ stages:
       inputs:
         provider: azurerm
         command: plan
-        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
         environmentServiceNameAzureRM: Devopsadvancesc
 
     - task: TerraformTask@5
@@ -93,7 +93,7 @@ stages:
       inputs:
         provider: azurerm
         command: apply
-        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Prod
         environmentServiceNameAzureRM: Devopsadvancesc    
 
 
