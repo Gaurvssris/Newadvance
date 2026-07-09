@@ -102,4 +102,10 @@ stages:
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
         environmentServiceNameAzureRM: Devopsadvancesc
 
-
+    - task: TerraformTask@5
+      displayName: Terraform Apply
+      inputs:
+        provider: azurerm
+        command: apply
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        environmentServiceNameAzureRM: Devopsadvancesc
