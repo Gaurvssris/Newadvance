@@ -79,20 +79,22 @@ stages:
         cd "$(System.DefaultWorkingDirectory)/Root/Dev"
         tfsec .
       displayName: Run TFSec
-    
+
     - task: TerraformTask@5
       displayName: Terraform Plan
       inputs:
         provider: azurerm
         command: plan
         workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
-    
+        environmentServiceNameAzureRM: Devopsadvancesc
+
     - task: TerraformTask@5
       displayName: Terraform Apply
       inputs:
         provider: azurerm
         command: apply
-        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev    
+        workingDirectory: $(System.DefaultWorkingDirectory)/Root/Dev
+        environmentServiceNameAzureRM: Devopsadvancesc    
 
 
 
