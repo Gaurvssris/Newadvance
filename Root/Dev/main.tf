@@ -4,14 +4,17 @@ rg =var.rg1
 }
 
 module "acr" {
-source = "../../Acr"
-acr = var.acr1
+  source = "../../Acr"
+  acr    = var.acr1
+
+  depends_on = [
+    module.resourcegroup
+  ]
 }
 
 module "aks" {
   source = "../../AKS"
-
-  aks = var.aks
+  aks    = var.aks
 
   depends_on = [
     module.resourcegroup,
