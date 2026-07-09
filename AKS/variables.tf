@@ -1,11 +1,12 @@
 variable "aks" {
-      type = map(object({
+  type = map(object({
     name                = string
     location            = string
     resource_group_name = string
     dns_prefix          = string
     kubernetes_version  = string
-    vm_size             = string
+    node_pool_name      = string
     node_count          = number
+    vm_size             = string
   }))
 }

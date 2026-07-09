@@ -14,16 +14,17 @@ admin_enabled       = true
 }
 }       
 
-aks1 = {
-aks01 = {
-name = "aks-dev"
-resource_group_name = "rg_dev"
-location = "East US"
-dns_prefix = "aksdev"
-node_pool_name = "nodepool1"
-node_count = 2
-vm_size = "Standard_B2s"
-}
+aks = {
+  aks1 = {
+    name                = "dev-aks"
+    location            = "Central India"
+    resource_group_name = "rg-dev"
+    dns_prefix          = "devaks"
+    kubernetes_version  = "1.32.0"
+    node_pool_name      = "system"
+    node_count          = 2
+    vm_size             = "Standard_DS2_v2"
+  }
 }
 
 # storageact = {

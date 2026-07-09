@@ -9,9 +9,14 @@ acr = var.acr1
 }
 
 module "aks" {
-source = "../../AKS"
-aks = var.aks1
-depends_on = [module.resourcegroup,module.acr]
+  source = "../../AKS"
+
+  aks = var.aks
+
+  depends_on = [
+    module.resourcegroup,
+    module.acr
+  ]
 }
 
 # module "storage" {
