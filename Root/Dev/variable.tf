@@ -14,6 +14,8 @@ variable "acr1" {
   }))
 }
 variable "aks" {
+  description = "AKS Configuration"
+
   type = map(object({
     name                = string
     location            = string

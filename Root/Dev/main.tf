@@ -9,7 +9,7 @@ acr = var.acr1
 }
 
 module "aks" {
-  source = "../../AKS"
+  source = "../../Modules/AKS"
 
   aks = var.aks
 
